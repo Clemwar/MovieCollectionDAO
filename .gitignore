@@ -72,7 +72,7 @@ local.properties
 *.class
 
 #Configuration
-PersistanceConfig.java
+/src/main/java/fr/clemwar/mc/config/*
 
 # Log file
 *.log
