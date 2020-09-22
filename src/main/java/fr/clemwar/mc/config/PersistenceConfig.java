@@ -1,11 +1,19 @@
 package fr.clemwar.mc.config;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -15,24 +23,30 @@ import fr.clemwar.mc.dao.McDao;
 import fr.clemwar.mc.dao.McDaoImpl;
 
 @Configuration
+@PropertySource("classpath:application.properties")
 public class PersistenceConfig {
+	
+	@Autowired
+	private Environment env;
 
 	/**
 	 * Datasource settings : connect to bdd mc_project_db
+	 * 
 	 * @return Datasource
 	 */
 	@Bean
 	public DataSource dataSource() {
 		DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
-		dataSourceBuilder.driverClassName("org.postgresql.Driver");
-		dataSourceBuilder.url("jdbc:postgresql://localhost:5432/mc_project_db");
-		dataSourceBuilder.username("mc_admin");
-		dataSourceBuilder.password("M7xT2f");
+		dataSourceBuilder.driverClassName(env.getProperty("postgreDriver"));
+		dataSourceBuilder.url(env.getProperty("dbUrl"));
+		dataSourceBuilder.username(env.getProperty("dbUsername"));
+		dataSourceBuilder.password(env.getProperty("dbPassword"));
 		return dataSourceBuilder.build();
 	}
-	
+
 	/**
 	 * Entity Manager Factory with hibernate
+	 * 
 	 * @return EntityManager
 	 */
 	@Bean
@@ -44,12 +58,13 @@ public class PersistenceConfig {
 		factory.setPackagesToScan("fr.clemwar.mc.model");
 		factory.setDataSource(dataSource());
 		factory.afterPropertiesSet();
-		
+
 		return factory.getObject();
 	}
-	
+
 	/**
 	 * Prepare transaction manager
+	 * 
 	 * @return PlatformTransactionManager
 	 */
 	@Bean
@@ -59,7 +74,7 @@ public class PersistenceConfig {
 		txManager.setEntityManagerFactory(entityManagerFactory());
 		return txManager;
 	}
-	
+
 	@Bean
 	McDao mcDao() {
 		return new McDaoImpl();
