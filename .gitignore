@@ -70,6 +70,7 @@ local.properties
 ### Java ###
 # Compiled class file
 *.class
+application.properties
 
 #Configuration
 src/main/java/fr/clemwar/mc/config/*
